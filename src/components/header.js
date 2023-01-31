@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { BsFillCameraReelsFill } from "react-icons/bs";
+import { AiFillPlusCircle } from "react-icons/ai";
 
 export default function Header() {
 
@@ -9,6 +10,9 @@ export default function Header() {
       <Link to="/" className="logo">
         <BsFillCameraReelsFill/>
       <div>Movie Diary</div>
+      </Link>
+      <Link to="/criar-filme" className="create">
+        <AiFillPlusCircle/>
       </Link>
     </StyleHeader>
   );
@@ -29,7 +33,6 @@ const StyleHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   padding-left: 10%;
-  padding-right: 15%;
   .logo{
     width: 340px;
     display: flex;
@@ -40,10 +43,13 @@ const StyleHeader = styled.div`
   color: white;
   }
 
-
-
-  @media (max-width: 614px) {
-    width: 100%;
-    height: 80px;
+  .create{
+    width: 340px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 40px;
+  font-weight: bold;
+  color: white;
   }
 `;

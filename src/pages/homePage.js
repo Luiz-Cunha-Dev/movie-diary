@@ -9,19 +9,53 @@ export default function HomePage() {
     const [window, setWindow] = useState("none")
     const [movies, setMovies] = useState([])
     const [chosenMovie, setchosenMovie] = useState({})
+    const [platformAndGenre, setPlatformAndGenre] = useState({})
+    const [review, setReview] = useState(0)
 
 
     useEffect(() => {
+        loadMovies()
+    }, [])
+
+    function loadMovies(){
         const URL = `https://api-movie-diary-2.onrender.com/movies`
         axios.get(URL)
         .then(res => {
-            console.log(res);
+            console.log(res.data);
             setMovies(res.data)
         })
         .catch(err => {
             console.log(err);
         })
-    }, [])
+    }
+
+    function deleteMovie(movieId){
+
+        const URL = `https://api-movie-diary-2.onrender.com/movies/${movieId}`
+        axios.delete(URL)
+        .then(res => {
+            console.log(res.data);
+            alert("Filme apagado com sucesso!")
+            setWindow("none")
+            loadMovies()
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
+
+    function sendReview(movieId){
+        const URL = `https://api-movie-diary-2.onrender.com/movies/${movieId}`
+        axios.put(URL, {score: review})
+        .then(res => {
+            console.log(res.data);
+            alert("Avaliação feita com sucesso!")
+            loadMovies()
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
 
     return (
         <>
@@ -29,14 +63,14 @@ export default function HomePage() {
 
         <div className="allMovies">
             {movies.map(m => 
-                <div className="movie" onClick={() => {setWindow("flex"); setchosenMovie(m)}}>
+                <div className="movie" onClick={() => {setWindow("flex"); m.reviews !== null ? setReview(m.reviews.score) : setReview(0); setchosenMovie(m); setPlatformAndGenre({platform: m.platforms.name, genre: m.genres.name, review: m.reviews.score})}}>
                 <img src={m.imgUrl} alt="filme" />
                 <p>{m.title}</p>
                 </div>
             )}
             
         </div>
-        <MovieInformation close={() => setWindow("none")} window={window} img={chosenMovie.imgUrl} title={chosenMovie.title}/>
+        <MovieInformation send={() => sendReview(chosenMovie.id)} star5={() => setReview(5)} star4={() => setReview(4)} star3={() => setReview(3)} star2={() => setReview(2)} star1={() => setReview(1)} review={review} delete={() => deleteMovie(chosenMovie.id)} close={() => setWindow("none")} genre={platformAndGenre.genre} platform={platformAndGenre.platform} window={window} img={chosenMovie.imgUrl} title={chosenMovie.title} />
 </HomePageStyle>
         </>
     )
@@ -48,19 +82,21 @@ function MovieInformation(props){
     <img src={props.img} alt="movie" />
     <div className="options">
         <p>{props.title}</p>
+        <p>Plataforma: {props.platform}</p>
+        <p>Genero: {props.genre}</p>
         <div onClick={props.close} className="x">X</div>
         <div className="review">
             <p>De uma nota ao filme!</p>
             <div className="stars">
-                <BiStar/>
-                <BiStar/>
-                <BiStar/>
-                <BiStar/>
-                <BiStar/>
+                {props.review > 0 ? <AiFillStar onClick={props.star1}/> : <BiStar onClick={props.star1}/>}
+                {props.review >= 2 ? <AiFillStar onClick={props.star2}/> : <BiStar onClick={props.star2}/>}
+                {props.review >= 3 ? <AiFillStar onClick={props.star3}/> : <BiStar onClick={props.star3}/>}
+                {props.review >= 4 ? <AiFillStar onClick={props.star4}/> : <BiStar onClick={props.star4}/>}
+                {props.review === 5 ? <AiFillStar onClick={props.star5}/> : <BiStar onClick={props.star5}/>}
             </div>
-            <button>Salvar nota</button>
+            <button onClick={props.send}>Salvar nota</button>
         </div>
-        <button>Deletar filme</button>
+        <button onClick={props.delete}>Deletar filme</button>
     </div>
 </MovieInformationStyle>
     )
@@ -139,16 +175,18 @@ img{
         cursor: pointer;
     }
     p{
+        margin-top: 13px;
     font-size: 30px;
+    text-align: center;
   color: black;
 }
 .review{
-margin-top: 100px;
+margin-top: 40px;
 display: flex;
 flex-direction: column;
 align-items: center;
 button{
-    margin-top: 70px;
+    margin-top: 40px;
     width: 150px;
     height: 60px;
     background-color: green;
@@ -157,6 +195,7 @@ button{
     color: white;
     border: thin;
     border-radius: 20px;
+    cursor: pointer;
 }
 }
 .stars{
@@ -164,7 +203,7 @@ button{
 font-size: 40px;
 }
 button{
-    margin-top: 100px;
+    margin-top: 40px;
     width: 150px;
     height: 60px;
     background-color: red;
@@ -173,6 +212,7 @@ button{
     color: white;
     border: thin;
     border-radius: 20px;
+    cursor: pointer;
 }
 }
 `
